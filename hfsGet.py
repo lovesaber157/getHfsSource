@@ -1,3 +1,4 @@
+import threading
 import argparse
 import urllib
 import httpx
@@ -20,10 +21,13 @@ def getSource(ipaddress,port,sourceName):
 # 存活判断
 def judgment_Survival(ipaddress,port):
     href = f"http://{ipaddress}:{port}"
-    status_code = httpx.head(href).status_code
-    if status_code != 200:
-        print("抱歉，您输入的IP或Port有错")
-        return 0
+    try:
+        status_code = httpx.head(href).status_code
+        if status_code != 200:
+            print("抱歉，您输入的IP或Port有错")
+            return 0
+    except:
+        print("您网络是否存在问题?")
     return 1
 
 def getLogo():
@@ -40,19 +44,20 @@ def getLogo():
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description="欢迎来到HFS资源一建爬取工具")
-    parser.add_argument("-A",help="指定需要探测的网站IPAddress，形如192.168.226.240",required=True)
-    parser.add_argument("-P",help="指定爬取网站的端口，默认为80",default="80",type=int)
+    parser.add_argument("-a",help="指定需要探测的网站IPAddress，形如192.168.226.240",required=True)
+    parser.add_argument("-p",help="指定爬取网站的端口，默认为80",default="80",type=int)
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
     getLogo()
     args = getParserArgs()
-    ipaddress = args.A
-    port = args.P
+    ipaddress = args.a
+    port = args.p
     status = judgment_Survival(ipaddress,port)
     if status:
         sourceNames = sendHTTP(ipaddress,port)
         for sourceName in sourceNames:
-            getSource(ipaddress,port,sourceName)
+            t = threading.Thread(getSource(ipaddress,port,sourceName))
+            t.start()
     exit()
