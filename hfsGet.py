@@ -24,10 +24,11 @@ def judgment_Survival(ipaddress,port):
     try:
         status_code = httpx.head(href).status_code
         if status_code != 200:
-            print("抱歉，您输入的IP或Port有错")
+            print("抱歉，您输入的IP或Port有错,无法获得任何有效资源")
             return 0
     except:
         print("您网络是否存在问题?")
+        return 0
     return 1
 
 def getLogo():
@@ -54,6 +55,7 @@ if __name__ == '__main__':
     args = getParserArgs()
     ipaddress = args.a
     port = args.p
+    print(f"HFS所在IPAddress:{ipaddress},Port:{port}")
     status = judgment_Survival(ipaddress,port)
     if status:
         sourceNames = sendHTTP(ipaddress,port)
